@@ -3,6 +3,7 @@ from keras import optimizers
 from keras import callbacks
 from keras.layers import Dense, Dropout
 from sklearn.preprocessing import Normalizer
+from time import time
 
 import numpy
 import utils
@@ -35,12 +36,12 @@ def normalize_data(x_train, x_test):
     return x_train, x_test
 
 
-def validate_data(strName, x, y):
+def validate_data(str_test, x, y):
     scores = model.evaluate(x, y, batch_size=50, verbose=0)
-    print("\n%s %s: %.2f%%\n" % (strName, model.metrics_names[1], scores[1] * 100))
+    print("\n%s %s: %.2f%%\n" % (str_test, model.metrics_names[1], scores[1] * 100))
 
 
-def output_predictions(predictions):
+def print_predictions(predictions):
     for i in range(len(predictions))[:10]:
         print('Predicted=%f, Expected=%f' % (round(y_test[i]), round(predictions[i][0])))
 
@@ -49,8 +50,11 @@ if __name__ == '__main__':
     # Config
     dropout = 0.40
     lr_rate = 0.003
-    units = [12, 8, 1]
     loss_patience = 1
+    units = [12, 8, 1]
+
+    # Execution start time, used to calculate total script completion time.
+    startTime = time()
 
     # Check that our train/test data is available, then load it.
     train, test = utils.load_dataset()
@@ -82,4 +86,7 @@ if __name__ == '__main__':
     predictions = model.predict(X_test)
 
     # Output our test dataset for visualization.
-    output_predictions(predictions)
+    print_predictions(predictions)
+
+    # Print script execution time.
+    print("\nExecution time: %s %s \n " % (time() - startTime, " Seconds"))
