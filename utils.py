@@ -1,7 +1,7 @@
 import numpy
 
-EXO_TRAINING = 'exo_train.csv.gz'
-EXO_TEST = 'exo_test.csv.gz'
+EXO_TRAINING = 'data/exo_train.csv.gz'
+EXO_TEST = 'data/exo_test.csv.gz'
 
 
 def load_dataset():
