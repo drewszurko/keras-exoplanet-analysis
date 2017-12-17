@@ -1,6 +1,7 @@
 numpy==1.13.3
 requests==2.18.1
 keras==2.1.2
+pandas==0.21.1
 scikit_learn==0.19.1
 tqdm==4.19.5
 tensorflow==1.4.1
