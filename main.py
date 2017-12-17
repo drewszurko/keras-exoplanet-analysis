@@ -7,11 +7,11 @@ from sklearn.preprocessing import Normalizer
 from time import time
 
 import tensorflow as tf
-import numpy
 import utils
 
 
 def create_model(gpus, units, dropout, lr_rate):
+    # Create model using all cpu cores.
     with tf.device('/cpu:0'):
         model = Sequential()
         model.add(Dense(units[0], input_dim=3196, activation='relu'))
@@ -19,13 +19,15 @@ def create_model(gpus, units, dropout, lr_rate):
         model.add(Dense(units[1], activation='relu'))
         model.add(Dropout(dropout))
         model.add(Dense(units[2], activation='sigmoid'))
-    adam_optimizer = optimizers.Adam(lr=lr_rate)
-    model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
+        adam_optimizer = optimizers.Adam(lr=lr_rate)
 
+    # If gpu count is not 2-8, return the regular model. Keras auto detects gpu counts 0,1 and 9+ gpus is not supported.
     if gpus not in (2, 9):
         return model
     else:
-        return multi_gpu_model(model, gpus)
+        model = multi_gpu_model(model, gpus)
+        model = model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
+        return model
 
 
 def fit_model(model, patience):
@@ -39,7 +41,11 @@ def fit_model(model, patience):
 
 def normalize_data(x_train, x_test):
     normalizer = Normalizer()
+    # Fit our normalizer to our training data.
+    normalizer.fit(x_train)
+    # Transform the training data using our fitted normalizer.
     x_train = normalizer.transform(x_train)
+    # Transform the testing data using our x_trained fitted normalizer.
     x_test = normalizer.transform(x_test)
     return x_train, x_test
 
@@ -77,8 +83,8 @@ if __name__ == '__main__':
     y_train = train[:, 0]
 
     # Split test data into input (X) and output (Y) variables.
-    X_test = numpy.array(test[:, 1:3197])
-    y_test = numpy.array(test[:, 0])
+    X_test = test[:, 1:3197]
+    y_test = test[:, 0]
 
     # Normalize train and test features
     X_train, X_test = normalize_data(X_train, X_test)
@@ -102,4 +108,4 @@ if __name__ == '__main__':
     print_predictions(predictions, print_results)
 
     # Print script execution time.
-    print("\nExecution time: %s %s \n " % (time() - startTime, " Seconds"))
+    print("\nExecution time: %s %s \n " % (time() - startTime, "seconds"))
