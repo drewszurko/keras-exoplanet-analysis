@@ -1,8 +1,8 @@
 from tqdm import tqdm
 import requests
-import numpy
 import os
 import errno
+import pandas as pd
 
 # Local/remote location of exoplanet datasets.
 EXO_TRAINING = 'data/exo_train.csv.gz'
@@ -38,13 +38,14 @@ def dir_availability():
 # Loads our training and testing data. Try/except will redownload a dataset file if it's is corrupt or missing.
 def load_dataset(name, filepath, url):
     try:
-        data = numpy.loadtxt(filepath, delimiter=",", skiprows=1)
+        data = pd.read_csv(filepath, delimiter=",", skiprows=1)
         print("%s data imported successfully." % name)
     except Exception:
         print('\n%s data is missing or corrupt. Lets fix this!' % name)
         download_dataset(name, filepath, url)
-        data = numpy.loadtxt(filepath, delimiter=",", skiprows=1)
+        data = pd.read_csv(filepath, delimiter=",", skiprows=1)
         print("%s data imported successfully." % name)
+    data = data.values
     return data
 
 
