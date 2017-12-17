@@ -38,12 +38,12 @@ def dir_availability():
 # Loads our training and testing data. Try/except will redownload a dataset file if it's is corrupt or missing.
 def load_dataset(name, filepath, url):
     try:
-        data = pd.read_csv(filepath, delimiter=",", skiprows=1)
+        data = pd.read_csv(filepath, delimiter=",", header=0)
         print("%s data imported successfully." % name)
     except Exception:
         print('\n%s data is missing or corrupt. Lets fix this!' % name)
         download_dataset(name, filepath, url)
-        data = pd.read_csv(filepath, delimiter=",", skiprows=1)
+        data = pd.read_csv(filepath, delimiter=",", header=0)
         print("%s data imported successfully." % name)
     data = data.values
     return data
