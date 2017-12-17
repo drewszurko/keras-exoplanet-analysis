@@ -45,7 +45,7 @@ def validate_data(str_test, x, y):
 def print_predictions(predictions, print_results):
     print('\nDisplaying first %s test results:\n' % print_results)
     for i in range(len(predictions))[:print_results]:
-        print('Predicted=%f, Expected=%f' % (round(y_test[i]), round(predictions[i][0])))
+        print('Predicted=%.1f, Expected=%.1f' % (round(predictions[i][0]), round(y_test[i])))
 
 
 if __name__ == '__main__':
