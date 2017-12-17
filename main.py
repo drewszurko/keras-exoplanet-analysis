@@ -22,6 +22,7 @@ def create_model(units, dropout, lr_rate):
 
 
 def fit_model(model, patience):
+    print("\nTraining model...\n")
     class_weight = {0: 1, 1: 136}
     cb = callbacks.EarlyStopping(monitor='val_loss', patience=patience)
     model.fit(X_train, y_train, epochs=1000, batch_size=50, callbacks=[cb], class_weight=class_weight,
@@ -38,26 +39,29 @@ def normalize_data(x_train, x_test):
 
 def validate_data(str_test, x, y):
     scores = model.evaluate(x, y, batch_size=50, verbose=0)
-    print("\n%s %s: %.2f%%\n" % (str_test, model.metrics_names[1], scores[1] * 100))
+    print("\n%s %s: %.2f%%" % (str_test, model.metrics_names[1], scores[1] * 100))
 
 
-def print_predictions(predictions):
-    for i in range(len(predictions))[:10]:
+def print_predictions(predictions, print_results):
+    print('\nDisplaying first %s test results:\n' % print_results)
+    for i in range(len(predictions))[:print_results]:
         print('Predicted=%f, Expected=%f' % (round(y_test[i]), round(predictions[i][0])))
 
 
 if __name__ == '__main__':
     # Config
-    dropout = 0.40
+    dropout = 0.30
     lr_rate = 0.003
     loss_patience = 1
     units = [12, 8, 1]
+    # Displays first n test predicted/expected results in the terminal window. Does not affect training/testing.
+    print_results = 10
 
     # Execution start time, used to calculate total script completion time.
     startTime = time()
 
     # Check that our train/test data is available, then load it.
-    train, test = utils.load_dataset()
+    train, test = utils.get_dataset()
 
     # Split train data into input (X) and output (Y) variables.
     X_train = train[:, 1:3197]
@@ -86,7 +90,7 @@ if __name__ == '__main__':
     predictions = model.predict(X_test)
 
     # Output our test dataset for visualization.
-    print_predictions(predictions)
+    print_predictions(predictions, print_results)
 
     # Print script execution time.
     print("\nExecution time: %s %s \n " % (time() - startTime, " Seconds"))
