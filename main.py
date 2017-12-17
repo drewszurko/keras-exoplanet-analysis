@@ -18,15 +18,12 @@ def create_model(gpus, units, dropout, lr_rate):
         model.add(Dropout(dropout))
         model.add(Dense(units[1], activation='relu'))
         model.add(Dropout(dropout))
-        model.add(Dense(units[2], activation='sigmoid'))
+        model.add(Dense(1, activation='sigmoid'))
         adam_optimizer = optimizers.Adam(lr=lr_rate)
-
-    # If gpu count is not 2-8, return the regular model. Keras auto detects gpu counts 0,1 and 9+ gpus is not supported.
-    if gpus not in (2, 9):
-        return model
-    else:
-        model = multi_gpu_model(model, gpus)
-        model = model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
+        # If gpu count 2-8, return the multi gpu model. Keras auto detects gpu counts 0,1 and 9+ gpus is not supported.
+        if gpus in (2, 9):
+            model = multi_gpu_model(model, gpus)
+        model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
         return model
 
 
@@ -62,18 +59,18 @@ def print_predictions(predictions, print_results):
 
 
 if __name__ == '__main__':
+    # Execution start time, used to calculate total script runtime.
+    startTime = time()
+
     # Config
-    dropout = 0.30
-    lr_rate = 0.003
+    dropout = 0.20
+    lr_rate = 0.001
     loss_patience = 1
-    units = [12, 8, 1]
+    units = [12, 8]
     # Displays first n test predicted/expected results in the terminal window. Does not affect training/testing.
     print_results = 10
-    # Multi gpu support. Replace the below number with your gpu count. Default: gpus=0
+    # Multi gpu support. Replace the below number with # of gpus. Default: gpus=0
     gpus = 0
-
-    # Execution start time, used to calculate total script completion time.
-    startTime = time()
 
     # Check that our train/test data is available, then load it.
     train, test = utils.get_dataset()
