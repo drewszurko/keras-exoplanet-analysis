@@ -2,23 +2,30 @@ from keras.models import Sequential
 from keras import optimizers
 from keras import callbacks
 from keras.layers import Dense, Dropout
+from keras.utils import multi_gpu_model
 from sklearn.preprocessing import Normalizer
 from time import time
 
+import tensorflow as tf
 import numpy
 import utils
 
 
-def create_model(units, dropout, lr_rate):
-    model = Sequential()
-    model.add(Dense(units[0], input_dim=3196, activation='relu'))
-    model.add(Dropout(dropout))
-    model.add(Dense(units[1], activation='relu'))
-    model.add(Dropout(dropout))
-    model.add(Dense(units[2], activation='sigmoid'))
+def create_model(gpus, units, dropout, lr_rate):
+    with tf.device('/cpu:0'):
+        model = Sequential()
+        model.add(Dense(units[0], input_dim=3196, activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(units[1], activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(units[2], activation='sigmoid'))
     adam_optimizer = optimizers.Adam(lr=lr_rate)
     model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
-    return model
+
+    if gpus not in (2, 9):
+        return model
+    else:
+        return multi_gpu_model(model, gpus)
 
 
 def fit_model(model, patience):
@@ -56,6 +63,8 @@ if __name__ == '__main__':
     units = [12, 8, 1]
     # Displays first n test predicted/expected results in the terminal window. Does not affect training/testing.
     print_results = 10
+    # Multi gpu support. Replace the below number with your gpu count. Default: gpus=0
+    gpus = 0
 
     # Execution start time, used to calculate total script completion time.
     startTime = time()
@@ -75,7 +84,7 @@ if __name__ == '__main__':
     X_train, X_test = normalize_data(X_train, X_test)
 
     # Create model.
-    model = create_model(units, dropout, lr_rate)
+    model = create_model(gpus, units, dropout, lr_rate)
 
     # Fit model.
     model = fit_model(model, loss_patience)
