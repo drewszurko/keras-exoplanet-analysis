@@ -7,7 +7,7 @@ from sklearn.preprocessing import Normalizer
 from time import time
 
 import tensorflow as tf
-import utils
+import data_utils
 
 
 def create_model(gpus, units, dropout, lr_rate):
@@ -20,8 +20,9 @@ def create_model(gpus, units, dropout, lr_rate):
         model.add(Dropout(dropout))
         model.add(Dense(1, activation='sigmoid'))
         adam_optimizer = optimizers.Adam(lr=lr_rate)
-        # If gpu count 2-8, return the multi gpu model. Keras auto detects gpu counts 0,1 and 9+ gpus is not supported.
-        if gpus in (2, 9):
+        # If gpu count >=2, return the multi_gpu_model. Keras uses regular model for gpu counts <=1.
+        # 9+ gpus is not supported so Keras will throw an error prompting the user to enter valid gpu #.
+        if gpus >= 2:
             model = multi_gpu_model(model, gpus)
         model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
         return model
@@ -31,7 +32,7 @@ def fit_model(model, patience):
     print("\nTraining model...\n")
     class_weight = {0: 1, 1: 136}
     cb = callbacks.EarlyStopping(monitor='val_loss', patience=patience)
-    model.fit(X_train, y_train, epochs=1000, batch_size=50, callbacks=[cb], class_weight=class_weight,
+    model.fit(X_train, y_train, epochs=1000, batch_size=32, callbacks=[cb], class_weight=class_weight,
               validation_data=(X_test, y_test))
     return model
 
@@ -48,7 +49,7 @@ def normalize_data(x_train, x_test):
 
 
 def validate_data(str_test, x, y):
-    scores = model.evaluate(x, y, batch_size=50, verbose=0)
+    scores = model.evaluate(x, y, batch_size=32, verbose=0)
     print("\n%s %s: %.2f%%" % (str_test, model.metrics_names[1], scores[1] * 100))
 
 
@@ -66,14 +67,14 @@ if __name__ == '__main__':
     dropout = 0.20
     lr_rate = 0.001
     loss_patience = 1
-    units = [12, 8]
+    units = [32, 16]
     # Displays first n test predicted/expected results in the terminal window. Does not affect training/testing.
     print_results = 10
     # Multi gpu support. Replace the below number with # of gpus. Default: gpus=0
     gpus = 0
 
     # Check that our train/test data is available, then load it.
-    train, test = utils.get_dataset()
+    train, test = data_utils.get_dataset()
 
     # Split train data into input (X) and output (Y) variables.
     X_train = train[:, 1:3197]
