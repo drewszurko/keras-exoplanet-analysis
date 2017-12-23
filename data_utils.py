@@ -1,3 +1,4 @@
+from __future__ import print_function
 from tqdm import tqdm
 import requests
 import os
@@ -64,7 +65,6 @@ def download_dataset(name, filepath, url):
 
     # Writes file to 'data' directory while displaying a download progress bar in the users terminal.
     with open(filepath, 'wb') as f:
-        # tqdm.write("\n")
         for chunk in tqdm(iterable=r.iter_content(chunk_size=1024), total=int(total_size / 1024), unit='KB', ncols=100):
             f.write(chunk)
 
