@@ -1,40 +1,8 @@
-from keras.models import Sequential
-from keras import optimizers
-from keras import callbacks
-from keras.layers import Dense, Dropout
-from keras.utils import multi_gpu_model
+from __future__ import print_function
 from sklearn.preprocessing import Normalizer
+from models import build_model, compile_model, fit_model
 from time import time
-
-import tensorflow as tf
 import data_utils
-
-
-def create_model(gpus, units, dropout, lr_rate):
-    # Create model using all cpu cores.
-    with tf.device('/cpu:0'):
-        model = Sequential()
-        model.add(Dense(units[0], input_dim=3196, activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(units[1], activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(1, activation='sigmoid'))
-        adam_optimizer = optimizers.Adam(lr=lr_rate)
-        # If gpu count >=2, return the multi_gpu_model. Keras uses regular model for gpu counts <=1.
-        # 9+ gpus is not supported so Keras will throw an error prompting the user to enter valid gpu #.
-        if gpus >= 2:
-            model = multi_gpu_model(model, gpus)
-        model.compile(loss='binary_crossentropy', optimizer=adam_optimizer, metrics=['accuracy'])
-        return model
-
-
-def fit_model(model, patience):
-    print("\nTraining model...\n")
-    class_weight = {0: 1, 1: 136}
-    cb = callbacks.EarlyStopping(monitor='val_loss', patience=patience)
-    model.fit(X_train, y_train, epochs=1000, batch_size=32, callbacks=[cb], class_weight=class_weight,
-              validation_data=(X_test, y_test))
-    return model
 
 
 def normalize_data(x_train, x_test):
@@ -88,10 +56,13 @@ if __name__ == '__main__':
     X_train, X_test = normalize_data(X_train, X_test)
 
     # Create model.
-    model = create_model(gpus, units, dropout, lr_rate)
+    model = build_model(gpus, units, dropout)
+
+    # Compile model.
+    model = compile_model(model, lr_rate)
 
     # Fit model.
-    model = fit_model(model, loss_patience)
+    model = fit_model(model, loss_patience, X_train, y_train, X_test, y_test)
 
     # Evaluate training data on the model.
     validate_data("Train", X_train, y_train)
