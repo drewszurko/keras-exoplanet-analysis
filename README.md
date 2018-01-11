@@ -1,4 +1,4 @@
-# keras-exoplanet-analysis
+# MLP Exoplanet Hunting
 #### Requirements
 * keras
 * numpy
@@ -15,7 +15,7 @@ pip install -r requirements.txt
 python main.py
 ```
 #### Datasets
-The datasets were created and open-sourced by Winter Delta (WΔ) and can be found on their [Kaggle](https://www.kaggle.com/keplersmachines/kepler-labelled-time-series-data) and [GitHub](https://github.com/winterdelta/KeplerAI). The datasets have been pre-split into training and testing files, `exo_train.csv.gz` and `exo_test.csv.gz`.
+The datasets were created and open-sourced by Winter Delta (WΔ) and can be found on [Kaggle](https://www.kaggle.com/keplersmachines/kepler-labelled-time-series-data) and [GitHub](https://github.com/winterdelta/KeplerAI). They have also been pre-split into training and testing files, `exo_train.csv.gz` and `exo_test.csv.gz`.
 
 #### Dataset Descriptions
 `exo_train.csv.gz`
