@@ -1,5 +1,5 @@
 numpy==1.13.3
-requests==2.18.1
+requests==2.20.0
 keras==2.1.2
 pandas==0.21.1
 scikit_learn==0.19.1
